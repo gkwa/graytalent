@@ -2,58 +2,53 @@ package test1
 
 import (
 	"fmt"
-	"log"
 
-	"github.com/charmbracelet/bubbles/textinput"
+	ti "github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func RunTest1() {
-	m := initialModel()
-	p := tea.NewProgram(m)
-	if _, err := p.Run(); err != nil {
-		log.Fatal(err)
-	}
-	userInput := m.textInput.Value()
-	fmt.Println("User input:", userInput)
-}
-
-type (
-	errMsg error
-)
-
-type model struct {
-	textInput textinput.Model
+type textinput struct {
+	textInput ti.Model
 	err       error
+	done      bool
+	prompt    string
 }
 
-func initialModel() model {
-	ti := textinput.New()
+func newTextinput(prompt, placeholder, value string) textinput {
+	ti := ti.New()
+	ti.SetValue(value)
+	ti.Placeholder = placeholder
 	ti.Focus()
 	ti.CharLimit = 156
 	ti.Width = 20
 
-	return model{
+	return textinput{
 		textInput: ti,
 		err:       nil,
+		prompt:    prompt,
 	}
 }
 
-func (m model) Init() tea.Cmd {
-	return textinput.Blink
+func (m textinput) Init() tea.Cmd {
+	return ti.Blink
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m textinput) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.Type {
-		case tea.KeyEnter, tea.KeyCtrlC, tea.KeyEsc:
+		switch msg.String() {
+		case "ctrl+c":
+			m.err = fmt.Errorf("cancelled by user")
+			fallthrough
+		case "enter", "esc":
+			m.done = true
 			return m, tea.Quit
 		}
 
-	case errMsg:
+	// We handle errors just like any other message
+	case error:
 		m.err = msg
 		return m, nil
 	}
@@ -62,10 +57,31 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View() string {
+func (m textinput) View() string {
+	if m.done {
+		return ""
+	}
+
 	return fmt.Sprintf(
-		"What’s your favorite Pokémon?\n\n%s\n\n%s",
+		"%s\n\n%s\n\n%s\n",
+		m.prompt,
 		m.textInput.View(),
-		"(esc to quit)",
-	) + "\n"
+		"(press <enter> to submit)",
+	)
+}
+
+func TextInput(prompt, placeholder, value string) (string, error) {
+	ti := newTextinput(prompt, placeholder, value)
+	p := tea.NewProgram(ti)
+	m, err := p.Run()
+	if err != nil {
+		return "", err
+	}
+
+	model, ok := m.(textinput)
+	if !ok {
+		return "", fmt.Errorf("unexpected model type")
+	}
+
+	return model.textInput.Value(), model.err
 }
