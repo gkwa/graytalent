@@ -3,7 +3,7 @@ module github.com/taylormonacelli/graytalent
 go 1.21.4
 
 require (
-	github.com/charmbracelet/bubbles v0.20.0
+	github.com/charmbracelet/bubbles v0.21.0
 	github.com/charmbracelet/bubbletea v1.3.4
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.1
