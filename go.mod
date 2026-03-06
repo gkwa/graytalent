@@ -2,7 +2,7 @@ module github.com/taylormonacelli/graytalent
 
 go 1.24.2
 
-toolchain go1.26.0
+toolchain go1.26.1
 
 require (
 	github.com/charmbracelet/bubbles/v2 v2.0.0
