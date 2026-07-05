@@ -6,7 +6,7 @@ toolchain go1.26.4
 
 require (
 	github.com/charmbracelet/bubbles/v2 v2.1.1
-	github.com/charmbracelet/bubbletea/v2 v2.0.7
+	github.com/charmbracelet/bubbletea/v2 v2.0.8
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/taylormonacelli/goldbug v0.0.6
